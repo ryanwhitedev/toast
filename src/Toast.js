@@ -13,7 +13,7 @@ function isValidSubmission(submission) {
   );
 }
 
-export default function Toast() {
+export default function Toast({ addLikedSubmission }) {
   const [open, setOpen] = useState(false);
   const [info, setInfo] = useState(null);
 
@@ -42,7 +42,12 @@ export default function Toast() {
 
     // TODO: handle "server" failures
     saveLikedFormSubmission(updatedInfo)
-      .then((resp) => console.log(resp))
+      .then((resp) => {
+        console.log(resp);
+        if (resp.status === 202) {
+          addLikedSubmission(updatedInfo);
+        }
+      })
       .catch((e) => console.error(e));
   };
 

@@ -9,6 +9,9 @@ import { fetchLikedFormSubmissions } from "./service/mockServer";
 function App() {
   const [likedSubmissions, setLikedSubmissions] = useState([]);
 
+  const addLikedSubmission = (submission) =>
+    setLikedSubmissions([...likedSubmissions, submission]);
+
   useEffect(() => {
     // TODO: handle failures
     fetchLikedFormSubmissions()
@@ -24,7 +27,7 @@ function App() {
       <Header />
       <Container>
         <Content likedSubmissions={likedSubmissions} />
-        <Toast />
+        <Toast addLikedSubmission={addLikedSubmission} />
       </Container>
     </>
   );
