@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, IconButton, Snackbar } from "@mui/material";
+import { Button, CircularProgress, IconButton, Snackbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { onMessage, saveLikedFormSubmission } from "./service/mockServer";
@@ -16,6 +16,8 @@ function isValidSubmission(submission) {
 export default function Toast({ addLikedSubmission }) {
   const [open, setOpen] = useState(false);
   const [info, setInfo] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [actionMessage, setActionMessage] = useState("LIKE");
 
   useEffect(() => {
     onMessage((formData) => setInfo(formData));
@@ -34,28 +36,41 @@ export default function Toast({ addLikedSubmission }) {
   };
 
   const saveSubmission = () => {
-    // Hide toast and save submission
-    setOpen(false);
+    // Show progress indicator
+    setSaving(true);
 
     const updatedInfo = { ...info };
     updatedInfo.data.liked = true;
 
-    // TODO: handle "server" failures
+    // Save form submission. If saving fails, show "RETRY" action to user.
     saveLikedFormSubmission(updatedInfo)
       .then((resp) => {
-        console.log(resp);
         if (resp.status === 202) {
           addLikedSubmission(updatedInfo);
+
+          // Add some suspense...
+          setTimeout(() => {
+            setOpen(false);
+            setSaving(false);
+          }, 400);
         }
       })
-      .catch((e) => console.error(e));
+      .catch((e) => {
+        console.error(e);
+        setSaving(false);
+        setActionMessage("RETRY");
+      });
   };
 
   const action = (
     <>
-      <Button color="primary" size="small" onClick={saveSubmission}>
-        LIKE
-      </Button>
+      {saving ? (
+        <CircularProgress size="1.5em" color="primary" />
+      ) : (
+        <Button color="primary" size="small" onClick={saveSubmission}>
+          {actionMessage}
+        </Button>
+      )}
       <IconButton
         size="small"
         aria-label="close"
