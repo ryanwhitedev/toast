@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, IconButton, Snackbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { onMessage } from "./service/mockServer";
+import { onMessage, saveLikedFormSubmission } from "./service/mockServer";
 
 function isValidSubmission(submission) {
   return (
@@ -33,10 +33,22 @@ export default function Toast() {
     setOpen(false);
   };
 
-  // TODO: Update LIKE action
+  const saveSubmission = () => {
+    // Hide toast and save submission
+    setOpen(false);
+
+    const updatedInfo = { ...info };
+    updatedInfo.data.liked = true;
+
+    // TODO: handle "server" failures
+    saveLikedFormSubmission(updatedInfo)
+      .then((resp) => console.log(resp))
+      .catch((e) => console.error(e));
+  };
+
   const action = (
     <>
-      <Button color="primary" size="small" onClick={handleClose}>
+      <Button color="primary" size="small" onClick={saveSubmission}>
         LIKE
       </Button>
       <IconButton
