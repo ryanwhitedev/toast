@@ -9,13 +9,17 @@ export default function Content({ likedSubmissions }) {
       <Typography variant="h4">Liked Form Submissions</Typography>
 
       <List>
-        {likedSubmissions.map(({ id, data }) => (
-          <ListItem disablePadding key={id}>
-            <ListItemText
-              primary={`${data.firstName} ${data.lastName} ${data.email}`}
-            />
-          </ListItem>
-        ))}
+        {likedSubmissions.length ? (
+          likedSubmissions.map(({ id, data }) => (
+            <ListItem disablePadding key={id}>
+              <ListItemText
+                primary={`${data.firstName} ${data.lastName} ${data.email}`}
+              />
+            </ListItem>
+          ))
+        ) : (
+          <Typography variant="p">No liked form submissions.</Typography>
+        )}
       </List>
     </Box>
   );
