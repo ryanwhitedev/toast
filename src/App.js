@@ -31,7 +31,7 @@ function App() {
 
   return (
     <>
-      <Header />
+      <Header disableNewSubmission={isValidSubmission(newSubmission)} />
       <Container>
         <Content loading={loading} likedSubmissions={likedSubmissions} />
         {isValidSubmission(newSubmission) && (
