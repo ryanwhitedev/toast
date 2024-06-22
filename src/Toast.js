@@ -43,14 +43,14 @@ export default function Toast({ info, addLikedSubmission, dismiss }) {
   };
 
   const { firstName, lastName, email } = info.data;
-  const message = `${firstName} ${lastName} - ${email}`;
+  const message = `${firstName} ${lastName}\n${email}`;
 
   const action = (
     <>
       {saving ? (
         <CircularProgress size="1.5em" color="primary" />
       ) : (
-        <Button color="primary" size="small" onClick={saveSubmission}>
+        <Button color="primary" size="small" onClick={saveSubmission} sx={{ fontWeight: "bold" }}>
           {buttonText}
         </Button>
       )}
@@ -72,6 +72,7 @@ export default function Toast({ info, addLikedSubmission, dismiss }) {
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       message={message}
       action={action}
+      sx={{ whiteSpace: "pre-line" }}
     />
   );
 }
