@@ -15,11 +15,31 @@ function App() {
 
   // Setup application on page load.
   useEffect(() => {
+    // Ensure App component is mounted before updating it's state.
+    let isMounted = true;
+
     // Fetch liked form submissions.
-    fetchData(setLikedSubmissions, setLoading);
+    fetchData()
+      .then((data) => {
+        if (isMounted) {
+          setLikedSubmissions(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => console.error(err));
 
     // Setup callback to run on form submission.
-    onMessage((formData) => setNewSubmission(formData));
+    onMessage((formData) => {
+      if (isMounted) {
+        setNewSubmission(formData);
+      }
+    });
+
+    // Cancel async state updates. This prevents the application from updating
+    // the component's state in case it's been unmounted.
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Add submission to liked submissions list.
