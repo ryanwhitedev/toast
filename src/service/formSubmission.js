@@ -6,7 +6,7 @@ import { fetchLikedFormSubmissions } from "./mockServer";
 //
 // TODO: add a delay between failed calls to help prevent overloading the
 // server in production.
-export async function fetchData(setState) {
+export async function fetchData(setLikedSubmissions, setLoading) {
   const maxRetries = 5;
 
   for (let i = 0; i <= maxRetries; i++) {
@@ -14,7 +14,8 @@ export async function fetchData(setState) {
       const resp = await fetchLikedFormSubmissions();
 
       if (resp.status === 200) {
-        setState(resp.formSubmissions);
+        setLikedSubmissions(resp.formSubmissions);
+        setLoading(false);
         break;
       }
     } catch (err) {

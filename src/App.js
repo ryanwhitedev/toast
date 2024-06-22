@@ -9,13 +9,14 @@ import { fetchData } from "./service/formSubmission";
 import { isValidSubmission } from "./utils";
 
 function App() {
+  const [loading, setLoading] = useState(true);
   const [newSubmission, setNewSubmission] = useState(null);
   const [likedSubmissions, setLikedSubmissions] = useState([]);
 
   // Setup application on page load.
   useEffect(() => {
     // Fetch liked form submissions.
-    fetchData(setLikedSubmissions);
+    fetchData(setLikedSubmissions, setLoading);
 
     // Setup callback to run on form submission.
     onMessage((formData) => setNewSubmission(formData));
@@ -32,7 +33,7 @@ function App() {
     <>
       <Header />
       <Container>
-        <Content likedSubmissions={likedSubmissions} />
+        <Content loading={loading} likedSubmissions={likedSubmissions} />
         {isValidSubmission(newSubmission) && (
           <Toast
             info={newSubmission}
