@@ -4,51 +4,42 @@ import Container from "@mui/material/Container";
 import Header from "./Header";
 import Content from "./Content";
 import Toast from "./Toast";
-import { fetchLikedFormSubmissions } from "./service/mockServer";
+import { onMessage } from "./service/mockServer";
+import { fetchData } from "./service/formSubmission";
+import { isValidSubmission } from "./utils";
 
 function App() {
+  const [newSubmission, setNewSubmission] = useState(null);
   const [likedSubmissions, setLikedSubmissions] = useState([]);
 
+  // Setup application on page load.
+  useEffect(() => {
+    // Fetch liked form submissions.
+    fetchData(setLikedSubmissions);
+
+    // Setup callback to run on form submission.
+    onMessage((formData) => setNewSubmission(formData));
+  }, []);
+
+  // Add submission to liked submissions list.
   const addLikedSubmission = (submission) =>
     setLikedSubmissions([...likedSubmissions, submission]);
 
-  // Fetch liked submission data on page load.
-  useEffect(() => {
-    // Make a best effort attempt to load the data. There is a very small
-    // chance (~0.0001%) that 6 consecutive calls to the "server" fail (based
-    // on 10% failure rate in mockServer.js).
-    //
-    // TODO: add a delay between failed calls to help prevent overloading the
-    // server in production.
-    async function fetchData() {
-      const maxRetries = 5;
-
-      for (let i = 0; i <= maxRetries; i++) {
-        try {
-          const resp = await fetchLikedFormSubmissions();
-
-          if (resp.status === 200) {
-            setLikedSubmissions(resp.formSubmissions);
-            break;
-          }
-        } catch (err) {
-          console.error(err); // Log error
-          if (i === maxRetries) {
-            console.error("Max retries exceeded:");
-          }
-        }
-      }
-    }
-
-    fetchData();
-  }, []);
+  // Dismiss toast by removing newSubmission.
+  const dismissToast = () => setNewSubmission(null);
 
   return (
     <>
       <Header />
       <Container>
         <Content likedSubmissions={likedSubmissions} />
-        <Toast addLikedSubmission={addLikedSubmission} />
+        {isValidSubmission(newSubmission) && (
+          <Toast
+            info={newSubmission}
+            addLikedSubmission={addLikedSubmission}
+            dismiss={dismissToast}
+          />
+        )}
       </Container>
     </>
   );

@@ -1,66 +1,49 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, CircularProgress, IconButton, Snackbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { saveLikedFormSubmission } from "./service/mockServer";
 
-import { onMessage, saveLikedFormSubmission } from "./service/mockServer";
-
-function isValidSubmission(submission) {
-  return (
-    typeof submission === "object" &&
-    submission !== null &&
-    submission.hasOwnProperty("id") &&
-    submission.hasOwnProperty("data")
-  );
-}
-
-export default function Toast({ addLikedSubmission }) {
-  const [open, setOpen] = useState(false);
-  const [info, setInfo] = useState(null);
+export default function Toast({ info, addLikedSubmission, dismiss }) {
   const [saving, setSaving] = useState(false);
-  const [actionMessage, setActionMessage] = useState("LIKE");
-
-  useEffect(() => {
-    onMessage((formData) => setInfo(formData));
-  }, []);
-
-  useEffect(() => {
-    setOpen(isValidSubmission(info));
-  }, [info]);
+  const [buttonText, setButtonText] = useState("LIKE");
 
   const handleClose = (_event, reason) => {
-    // Force user to dismiss the toast.
+    // Prevent toast from closing when clicking elsewhere on the screen.
     if (reason === "clickaway") {
       return;
     }
-    setOpen(false);
+    dismiss();
   };
 
   const saveSubmission = () => {
     // Show progress indicator
     setSaving(true);
 
-    const updatedInfo = { ...info };
-    updatedInfo.data.liked = true;
+    const updatedData = { ...info };
+    updatedData.data.liked = true;
 
     // Save form submission. If saving fails, show "RETRY" action to user.
-    saveLikedFormSubmission(updatedInfo)
+    saveLikedFormSubmission(updatedData)
       .then((resp) => {
         if (resp.status === 202) {
-          addLikedSubmission(updatedInfo);
+          addLikedSubmission(updatedData);
 
           // Add some suspense...
           setTimeout(() => {
-            setOpen(false);
             setSaving(false);
-          }, 400);
+            handleClose();
+          }, 500);
         }
       })
       .catch((e) => {
         console.error(e);
         setSaving(false);
-        setActionMessage("RETRY");
+        setButtonText("RETRY");
       });
   };
+
+  const { firstName, lastName, email } = info.data;
+  const message = `${firstName} ${lastName} - ${email}`;
 
   const action = (
     <>
@@ -68,7 +51,7 @@ export default function Toast({ addLikedSubmission }) {
         <CircularProgress size="1.5em" color="primary" />
       ) : (
         <Button color="primary" size="small" onClick={saveSubmission}>
-          {actionMessage}
+          {buttonText}
         </Button>
       )}
       <IconButton
@@ -84,15 +67,11 @@ export default function Toast({ addLikedSubmission }) {
 
   return (
     <Snackbar
-      open={open}
+      open={true}
       onClose={handleClose}
-      message={
-        isValidSubmission(info)
-          ? `${info.data.firstName} ${info.data.lastName}\n${info.data.email}`
-          : ""
-      }
-      action={action}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      message={message}
+      action={action}
     />
   );
 }
